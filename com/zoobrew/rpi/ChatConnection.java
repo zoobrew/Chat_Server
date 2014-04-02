@@ -6,7 +6,8 @@ public class ChatConnection {
 	public enum ConnectionType{
 		TCP,UDP;
 	};
-	public String name;
+	/* Case-insensitive, must be downcased */
+	public String userName;
 	public int ip;
 	
 
