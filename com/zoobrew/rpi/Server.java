@@ -8,8 +8,8 @@ import java.util.Hashtable;
 /* Main Class of the Chat Server */
 public class Server {
 
-    public int portNumber;
-    Hashtable<String, ChatConnection> connections =
+    public static int portNumber;
+    static Hashtable<String, ChatConnection> connections =
             new Hashtable<String, ChatConnection>(32);
 
     //up to 32 concurrent clients
@@ -31,7 +31,7 @@ public class Server {
                 /* block until a client is connnected */
                 while (true) {
                     clientSocket = chatServerSocket.accept();
-                    clientConnection = new ChatConnection(clientSocket);
+                    clientConnection = new ChatConnection(clientSocket, connections);
                     new Thread(clientConnection).start();
                 }
 
