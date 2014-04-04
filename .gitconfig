@@ -1,0 +1,35 @@
+[color]
+	ui = true
+	diff = auto
+	branch = auto
+[alias]	
+	a  = add --all :/
+	at = add -u :/
+	ai = add -i
+	b = branch
+	c  = commit
+	ca = commit --amend
+	co = checkout
+	cp = cherry-pick
+	d  = diff
+	dw = diff --word-diff
+	dc = diff --cached
+	dh = diff HEAD~ HEAD
+	gi = grep -in
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative --decorate=short
+	ls = log --stat --abbrev-commit --decorate=full --graph
+	l  = log --graph --abbrev-commit 
+	r = rebase
+	s  = status
+	sha = rev-parse --short
+	stash-undo = stash show -p | git apply -R
+[merge]
+	tool = meld
+#	conflictstyle = diff3
+[push]
+	default = tracking
+[branch]
+	autosetuprebase = always
+[user]
+	name = Jared Corso
+	email = jaredcorso@gmail.com
