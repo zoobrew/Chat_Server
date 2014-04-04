@@ -2,7 +2,7 @@
 *.jar
 bin/**
 
-.project
+#.project
 .metadata
-.classpath
+#.classpath
 .settings/**
