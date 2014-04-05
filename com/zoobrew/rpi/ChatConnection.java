@@ -53,19 +53,44 @@ public class ChatConnection implements Runnable{
 
     }
     
+    public void writeToClient(String message){
+    	mPrinter.println(message);
+    }
+    
     private void parseMessage(String input){
     	if(input.startsWith(LOGIN)){
     		login(input.substring(LOGIN.length()));
     	} else if (input.startsWith(SEND_MESSAGE)){
-    		
+    		//sendMessage(input);
     	} else if (input.startsWith(SEND_ALL)){
-    		
+    		//sendAll(input)
     	} else if (input.startsWith(HERE)){
     		userList();
     	} else if (input.startsWith(EXIT)){
     		logout();
-    	} else {
     	}
+    }
+    private void prepareMessage(String input){
+    	if (!(input.indexOf(' ') < 0)){
+    		String sender = input.substring(0, input.indexOf(' '));
+    		if (sender.equalsIgnoreCase(mUserName)){
+    			String remaining = input.substring(sender.length());
+    			if (!(remaining.indexOf(' ') < 0)){
+    				String target = remaining.substring(0, remaining.indexOf(' ')).toLowerCase();
+    				ChatConnection recp = mConnectionTable.get(target);
+    				if (recp != null){
+    					String message = remaining.substring(target.length());
+    					recp.writeToClient(message);
+    				}
+    			}
+    		} else
+    			mPrinter.println("ERROR: cannot send message as another user");
+    	}
+    }
+    
+    
+    private void sendMessage(String target, String input){
+    	
     }
     
     private void userList(){
@@ -102,8 +127,19 @@ public class ChatConnection implements Runnable{
     		mLoggedIn = false;
     		mPrinter.println("User " + mUserName + " has logged out");
     	} else{
-    		mPrinter.println("Not logged is as any user");
+    		mPrinter.println("ERROR: Not logged is as any user");
     	}
-    	
+    }
+    
+    private String getFirstWord(String sentance){
+    	if (!(sentance.indexOf(' ') < 0)){
+			return sentance.substring(0, sentance.indexOf(' ')).toLowerCase();
+    	} else if (sentance.indexOf("\r\n") > -1){
+			return sentance.substring(0, sentance.indexOf("\r\n")).toLowerCase();
+		} else if  (sentance.indexOf('\n') > -1){
+			return sentance.substring(0, sentance.indexOf('\n')).toLowerCase();
+		} else {
+			return sentance;
+		}
     }
 }
