@@ -20,30 +20,31 @@ public class ChatConnection implements Runnable{
         TCP,UDP;
     };
     /* Case-insensitive, must be downcased */
-    private String userName;
-    private Boolean loggedIn;
-    private Socket clientSocket;
-    private Hashtable<String, ChatConnection> connectionTable;
+    private String mUserName;
+    private Boolean mLoggedIn;
+    private Socket mClientSocket;
+    PrintWriter mPrinter;
+    private Hashtable<String, ChatConnection> mConnectionTable;
     
 
     ChatConnection(Socket socket, Hashtable<String, ChatConnection> connections){
-        clientSocket = socket;
-        connectionTable = connections;
-        loggedIn = false;
+        mClientSocket = socket;
+        mConnectionTable = connections;
+        mLoggedIn = false;
     }
 
     @Override
     public void run() {
         try {
-        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        System.out.println("Accepted client socket from " + clientSocket.getRemoteSocketAddress());
+        mPrinter = new PrintWriter(mClientSocket.getOutputStream(), true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(mClientSocket.getInputStream()));
+        System.out.println("Accepted client socket from " + mClientSocket.getRemoteSocketAddress());
 
         String inputLine;
         String input;
             while ((inputLine = in.readLine()) != null) {
             	input = inputLine.trim();
-            	parseMessage(inputLine, out);
+            	parseMessage(inputLine);
             }
         } catch (IOException e) {
             System.out.println("IOException caught while writing to client");
@@ -52,51 +53,56 @@ public class ChatConnection implements Runnable{
 
     }
     
-    private void parseMessage(String input, PrintWriter write){
+    private void parseMessage(String input){
     	if(input.startsWith(LOGIN)){
-    		login(input.substring(LOGIN.length()), write);
+    		login(input.substring(LOGIN.length()));
     	} else if (input.startsWith(SEND_MESSAGE)){
     		
     	} else if (input.startsWith(SEND_ALL)){
     		
     	} else if (input.startsWith(HERE)){
-    		
+    		userList();
     	} else if (input.startsWith(EXIT)){
-    		logout(write);
+    		logout();
     	} else {
-            write.println(input);
     	}
     }
     
-    private void login(String message, PrintWriter write){
-    	if( loggedIn){
-    		write.println("Already logged in, log out to log in as another user");
+    private void userList(){
+    	for (String user : mConnectionTable.keySet()) {
+    		mPrinter.println(user);
+    	}
+    }
+    
+    private void login(String message){
+    	if( mLoggedIn){
+    		mPrinter.println("Already logged in, log out to log in as another user");
     	}
     	else {
 	    	if (message.indexOf('\n') > -1){
-				userName = message.substring(0, message.indexOf(' ')).toLowerCase();
+				mUserName = message.substring(0, message.indexOf(' ')).toLowerCase();
 			}else if (!(message.indexOf(' ') < 0)){
-				userName = message.substring(0, message.indexOf(' ')).toLowerCase();
+				mUserName = message.substring(0, message.indexOf(' ')).toLowerCase();
 			} else {
-				userName = message.toLowerCase();
+				mUserName = message.toLowerCase();
 			}
-			if (connectionTable.containsKey(userName)){
-				write.println("Username is already in use");
+			if (mConnectionTable.containsKey(mUserName)){
+				mPrinter.println("Username is already in use");
 			} else {
-				connectionTable.put(userName, this);
-				loggedIn = true;
-				write.println("Username is: " + userName);
+				mConnectionTable.put(mUserName, this);
+				mLoggedIn = true;
+				mPrinter.println("Username is: " + mUserName);
 			}
     	}
     }
     
-    private void logout(PrintWriter write){
-    	if (loggedIn){
-    		connectionTable.remove(userName);
-    		loggedIn = false;
-    		write.println("User " + userName + " has logged out");
+    private void logout(){
+    	if (mLoggedIn){
+    		mConnectionTable.remove(mUserName);
+    		mLoggedIn = false;
+    		mPrinter.println("User " + mUserName + " has logged out");
     	} else{
-    		write.println("Not logged is as any user");
+    		mPrinter.println("Not logged is as any user");
     	}
     	
     }
