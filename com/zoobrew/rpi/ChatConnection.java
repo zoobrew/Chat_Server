@@ -19,7 +19,6 @@ public class ChatConnection implements Runnable{
 	public enum ConnectionType{
         TCP,UDP;
     };
-    /* Case-insensitive, must be downcased */
     private String mUserName;
     private Boolean mLoggedIn;
     private Socket mClientSocket;
@@ -61,7 +60,7 @@ public class ChatConnection implements Runnable{
     	if(input.startsWith(LOGIN)){
     		login(input.substring(LOGIN.length()));
     	} else if (input.startsWith(SEND_MESSAGE)){
-    		//sendMessage(input);
+    		sendMessage(input.substring(SEND_MESSAGE.length()));
     	} else if (input.startsWith(SEND_ALL)){
     		//sendAll(input)
     	} else if (input.startsWith(HERE)){
@@ -70,27 +69,24 @@ public class ChatConnection implements Runnable{
     		logout();
     	}
     }
-    private void prepareMessage(String input){
-    	if (!(input.indexOf(' ') < 0)){
-    		String sender = input.substring(0, input.indexOf(' '));
-    		if (sender.equalsIgnoreCase(mUserName)){
-    			String remaining = input.substring(sender.length());
-    			if (!(remaining.indexOf(' ') < 0)){
-    				String target = remaining.substring(0, remaining.indexOf(' ')).toLowerCase();
-    				ChatConnection recp = mConnectionTable.get(target);
-    				if (recp != null){
-    					String message = remaining.substring(target.length());
-    					recp.writeToClient(message);
-    				}
-    			}
-    		} else
-    			mPrinter.println("ERROR: cannot send message as another user");
-    	}
+    
+    private void sendMessage(String input){
+    	String sender = getFirstWord(input);
+    	mPrinter.println("sender is: " + sender + "!");
+    	String remaining = input.substring(sender.length()+1);
+		if (sender.equalsIgnoreCase(mUserName)){
+			String target = getFirstWord(remaining).toLowerCase();
+			mPrinter.println("TARGET is: " + target + "!");
+			remaining = remaining.substring(target.length()+1);
+			sendMessageToUser(target, remaining);
+		} else {
+			mPrinter.println("ERROR: cannot send message as another user");
+		}
     }
     
-    
-    private void sendMessage(String target, String input){
-    	
+    private void sendMessageToUser(String target, String message){
+    	ChatConnection recp = mConnectionTable.get(target);
+    	recp.writeToClient(message);
     }
     
     private void userList(){
