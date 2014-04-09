@@ -46,7 +46,10 @@ public class ChatConnection implements Runnable{
         String input;
             while ((inputLine = in.readLine()) != null) {
             	input = inputLine.trim();
-            	parseMessage(input);
+            	if (!parseMessage(input)){
+            		mClientSocket.close();
+            		break;
+            	}
             }
         } catch (IOException e) {
             System.out.println("IOException caught while writing to client");
@@ -59,22 +62,28 @@ public class ChatConnection implements Runnable{
     	mPrinter.println(message);
     }
     
-    private void parseMessage(String input){
+    private boolean parseMessage(String input){
     	if(input.startsWith(LOGIN)){
     		login(input.substring(LOGIN.length()));
-    	} else if (input.startsWith(SEND_MESSAGE)){
-    		sendMessage(input.substring(SEND_MESSAGE.length()));
-    	} else if (input.startsWith(SEND_ALL)){
-    		sendAll(input);
-    	} else if (input.startsWith(HERE)){
-    		userList();
-    	} else if (input.startsWith(EXIT)){
-    		logout();
-    	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND)){
-    		sendMessageToUser(((SendingMode) mMode).getRecipent(), input);
-    	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND_ALL)){
-    		sendAll(input);
+    	} else if (!(mUserName == null)) {
+    	
+	    	if (input.startsWith(SEND_MESSAGE)){
+	    		sendMessage(input.substring(SEND_MESSAGE.length()));
+	    	} else if (input.startsWith(SEND_ALL)){
+	    		sendAll(input);
+	    	} else if (input.startsWith(HERE)){
+	    		userList();
+	    	} else if (input.startsWith(EXIT)){
+	    		logout();
+	    	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND)){
+	    		sendMessageToUser(((SendingMode) mMode).getRecipent(), input);
+	    	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND_ALL)){
+	    		sendAll(input);
+	    	}
+    	} else {
+    		return false;
     	}
+    	return true;
     }
     
     private void sendAll(String input){
