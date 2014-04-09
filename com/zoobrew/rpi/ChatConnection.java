@@ -19,17 +19,20 @@ public class ChatConnection implements Runnable{
 	public enum ConnectionType{
         TCP,UDP;
     };
+
     private String mUserName;
     private Boolean mLoggedIn;
     private Socket mClientSocket;
     PrintWriter mPrinter;
     private Hashtable<String, ChatConnection> mConnectionTable;
+    private ChatMode mMode;
     
 
     ChatConnection(Socket socket, Hashtable<String, ChatConnection> connections){
         mClientSocket = socket;
         mConnectionTable = connections;
         mLoggedIn = false;
+        mMode = new NormalMode();
     }
 
     @Override
@@ -43,7 +46,7 @@ public class ChatConnection implements Runnable{
         String input;
             while ((inputLine = in.readLine()) != null) {
             	input = inputLine.trim();
-            	parseMessage(inputLine);
+            	parseMessage(input);
             }
         } catch (IOException e) {
             System.out.println("IOException caught while writing to client");
@@ -67,17 +70,22 @@ public class ChatConnection implements Runnable{
     		userList();
     	} else if (input.startsWith(EXIT)){
     		logout();
+    	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND)){
+    		sendMessageToUser(((SendingMode) mMode).getRecipent(), input);
+    	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND_ALL)){
+    		//sendall(input)
     	}
     }
     
     private void sendMessage(String input){
-    	String sender = getFirstWord(input);
+    	String sender = getFirstWord(input).toLowerCase();
     	mPrinter.println("sender is: " + sender + "!");
     	String remaining = input.substring(sender.length()+1);
 		if (sender.equalsIgnoreCase(mUserName)){
 			String target = getFirstWord(remaining).toLowerCase();
-			mPrinter.println("TARGET is: " + target + "!");
+			mPrinter.println("Receipiant is: " + target + "!");
 			remaining = remaining.substring(target.length()+1);
+			mMode = new SendingMode(mUserName, target);
 			sendMessageToUser(target, remaining);
 		} else {
 			mPrinter.println("ERROR: cannot send message as another user");
@@ -128,12 +136,12 @@ public class ChatConnection implements Runnable{
     }
     
     private String getFirstWord(String sentance){
-    	if (!(sentance.indexOf(' ') < 0)){
-			return sentance.substring(0, sentance.indexOf(' ')).toLowerCase();
-    	} else if (sentance.indexOf("\r\n") > -1){
-			return sentance.substring(0, sentance.indexOf("\r\n")).toLowerCase();
-		} else if  (sentance.indexOf('\n') > -1){
-			return sentance.substring(0, sentance.indexOf('\n')).toLowerCase();
+    	if (!(sentance.indexOf("\r\n") < 0)){
+			return sentance.substring(0, sentance.indexOf("\r\n"));
+		} else if  (!(sentance.indexOf('\n') <0 )){
+			return sentance.substring(0, sentance.indexOf('\n'));
+		} else if (!(sentance.indexOf(' ') < 0)){
+			return sentance.substring(0, sentance.indexOf(' '));
 		} else {
 			return sentance;
 		}
