@@ -65,7 +65,7 @@ public class ChatConnection implements Runnable{
     	} else if (input.startsWith(SEND_MESSAGE)){
     		sendMessage(input.substring(SEND_MESSAGE.length()));
     	} else if (input.startsWith(SEND_ALL)){
-    		//sendAll(input)
+    		sendAll(input);
     	} else if (input.startsWith(HERE)){
     		userList();
     	} else if (input.startsWith(EXIT)){
@@ -73,8 +73,19 @@ public class ChatConnection implements Runnable{
     	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND)){
     		sendMessageToUser(((SendingMode) mMode).getRecipent(), input);
     	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND_ALL)){
-    		//sendall(input)
+    		sendAll(input);
     	}
+    }
+    
+    private void sendAll(String input){
+    	mMode = new SendAllMode(mUserName);
+    	String message = input.substring(SEND_ALL.length());
+    	for (String user : mConnectionTable.keySet()) {
+    		if (!(user.equalsIgnoreCase(mUserName))){
+    			sendMessageToUser(user, message);
+    		}
+    	}
+    	
     }
     
     private void sendMessage(String input){
@@ -94,7 +105,7 @@ public class ChatConnection implements Runnable{
     
     private void sendMessageToUser(String target, String message){
     	ChatConnection recp = mConnectionTable.get(target);
-    	recp.writeToClient(message);
+    	recp.writeToClient(mUserName + ": " + message);
     }
     
     private void userList(){

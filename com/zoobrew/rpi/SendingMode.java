@@ -1,6 +1,6 @@
 package com.zoobrew.rpi;
 
-public class SendingMode extends SendAllMode{
+public class SendingMode implements ChatMode{
 
 	private String mRecipent;
 	private String mSender;

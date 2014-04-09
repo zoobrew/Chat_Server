@@ -3,7 +3,11 @@ package com.zoobrew.rpi;
 public class SendAllMode implements ChatMode {
 
 	private String mSender;
-	
+
+	public SendAllMode(String user){
+		mSender = user;
+	}
+
 	public String getSender() {
 		return mSender;
 	}
