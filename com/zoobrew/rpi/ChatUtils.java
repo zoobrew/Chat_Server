@@ -24,7 +24,7 @@ public class ChatUtils {
     	}
     }
 	
-	public void sendMessageToUsers(String sender, LinkedList<String> targets, String message){
+	public static void sendMessageToUsers(String sender, String[] targets, String message){
 		for (String target: targets){
 			sendMessageToUser(sender, target, message);
 		}
@@ -36,6 +36,10 @@ public class ChatUtils {
     			ChatUtils.sendMessageToUser(sender, user, message);
     		}
     	}
+	}
+	
+	public static String[] SplitIntoWords(String message){
+		return message.split(" ");
 	}
 
 }

@@ -23,9 +23,8 @@ public class SendController {
     	mPrinter.println("sender is: " + sender + "!");
     	String remaining = input.substring(sender.length()+1);
 		if (sender.equalsIgnoreCase(mUser)){
-			String target = ChatUtils.getFirstWord(remaining).toLowerCase();
-			mPrinter.println("Receipiant is: " + target + "!");
-			handleSending(target);
+			String[] targets = ChatUtils.SplitIntoWords(remaining.toLowerCase());
+			handleSending(targets);
 		} else {
 			mPrinter.println("ERROR: cannot send message as another user");
 		}
@@ -78,7 +77,7 @@ public class SendController {
 		}
     }
 	
-	public void sendMessage(String target, String line){
+	public void sendMessage(String[] targets, String line){
 		int messageSize;
 		String input;
 		String nextLine;
@@ -88,7 +87,7 @@ public class SendController {
             	nextLine = input.trim();
             	if (nextLine.length() <= messageSize){
             		messageSize -= nextLine.length();
-            		ChatUtils.sendMessageToUser(mUser, target, nextLine);
+            		ChatUtils.sendMessageToUsers(mUser, targets, nextLine);
             	} else {
             		mPrinter.println("ERROR: message is larger than specified");
             		break;
@@ -102,7 +101,7 @@ public class SendController {
 		}
     }
 	
-	private void handleSending(String toUser){
+	private void handleSending(String[] targets){
 		String input;
 		String nextLine;
 		try {
@@ -110,9 +109,9 @@ public class SendController {
 			if (input != null){
 				nextLine = input.trim();
 				if(nextLine.startsWith("c")){
-					sendMessage(toUser, nextLine.substring(1));
+					sendMessage(targets, nextLine.substring(1));
 				} else {
-				sendMessage(toUser, nextLine);
+				sendMessage(targets, nextLine);
 				}
 			}
 		} catch (IOException e) {
