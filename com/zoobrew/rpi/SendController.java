@@ -23,14 +23,9 @@ public class SendController {
 			mPrinter.println("Receipiant is: " + target + "!");
 			remaining = remaining.substring(target.length()+1);
 			mConnection.setMode(new SendingMode(mUser, target));
-			sendMessageToUser(target, remaining);
+			ChatUtils.sendMessageToUser(mUser, target, remaining);
 		} else {
 			mPrinter.println("ERROR: cannot send message as another user");
 		}
-    }
-
-	public void sendMessageToUser(String target, String message){
-    	ChatConnection recp = Server.mConnections.get(target);
-    	recp.writeToClient("FROM " + mUser + '\n' + message);
     }
 }

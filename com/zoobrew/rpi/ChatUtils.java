@@ -13,5 +13,13 @@ public class ChatUtils {
 			return sentance;
 		}
     }
+	
+	public static void sendMessageToUser(String sender, String target, String message){
+    	ChatConnection recp = Server.mConnections.get(target);
+    	recp.writeToClient("FROM " + sender + '\n' + message);
+    	if (!(sender.equalsIgnoreCase("SYSTEM"))){
+    		Server.addMessage(sender);
+    	}
+    }
 
 }

@@ -81,7 +81,7 @@ public class ChatConnection implements Runnable{
 	    	} else if (input.startsWith(EXIT)){
 	    		logout();
 	    	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND)){
-	    		mSendController.sendMessageToUser(((SendingMode) mMode).getRecipent(), input);
+	    		ChatUtils.sendMessageToUser(mUserName, ((SendingMode) mMode).getRecipent(), input);
 	    	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND_ALL)){
 	    		sendAll(input);
 	    	}
@@ -100,7 +100,7 @@ public class ChatConnection implements Runnable{
     	String message = input.substring(SEND_ALL.length());
     	for (String user : Server.mConnections.keySet()) {
     		if (!(user.equalsIgnoreCase(mUserName))){
-    			mSendController.sendMessageToUser(user, message);
+    			ChatUtils.sendMessageToUser(mUserName, user, message);
     		}
     	}
     	
@@ -115,7 +115,7 @@ public class ChatConnection implements Runnable{
 			mPrinter.println("Receipiant is: " + target + "!");
 			remaining = remaining.substring(target.length()+1);
 			mMode = new SendingMode(mUserName, target);
-			mSendController.sendMessageToUser(target, remaining);
+			ChatUtils.sendMessageToUser(mUserName, target, remaining);
 		} else {
 			mPrinter.println("ERROR: cannot send message as another user");
 		}

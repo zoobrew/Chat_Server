@@ -11,22 +11,22 @@ public class RandomMessages {
 	"What?", "OKAY!", "What is your favorite color?", "I am leaving",
 	"Who am I?", "vim or emacs?", "Share your location?"
 	};
-	private LinkedList<ChatConnection> mLastConnections;
+	private LinkedList<String> mLastConnections;
 	private Random mRandom;
 
 	public RandomMessages(){
-		mLastConnections = new LinkedList<ChatConnection>();
+		mLastConnections = new LinkedList<String>();
 		mRandom = new Random();
 	}
 	
-	public void addMessage(ChatConnection connection){
-		mLastConnections.add(connection);
+	public void addMessage(String sender){
+		mLastConnections.add(sender);
 		if (mLastConnections.size() > 3){
 			mLastConnections.remove();
 		}
 	}
 
-	public ChatConnection getRandomConnection(){
+	public String getRandomConnection(){
 		return mLastConnections.get(mRandom.nextInt(mLastConnections.size()));
 	}
 	
