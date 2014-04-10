@@ -6,8 +6,10 @@ public class SendController {
 	private String mUser;
 	private ChatConnection mConnection;
     private DebugConnection mInOut;
+    private Server mServer;
 	
-	public SendController(ChatConnection connection, DebugConnection inOut){
+	public SendController(Server server, ChatConnection connection, DebugConnection inOut){
+		mServer = server;
 		mConnection = connection;
 		mUser = mConnection.getUsername();
 		mInOut = inOut;
@@ -52,9 +54,9 @@ public class SendController {
             	nextLine = input.trim();
             	if (nextLine.length() <= messageSize){
             		messageSize -= nextLine.length();
-            		ChatUtils.sendMessageToAll(mUser, nextLine);
+            		ChatUtils.sendMessageToAll(mServer, mUser, nextLine);
             	} else {
-            		ChatUtils.sendMessageToAll(mUser, nextLine.substring(0, messageSize));
+            		ChatUtils.sendMessageToAll(mServer, mUser, nextLine.substring(0, messageSize));
             		mInOut.printOut("ERROR: message is larger than specified");
             		break;
             	}
@@ -74,7 +76,7 @@ public class SendController {
             	nextLine = input.trim();
             	if (nextLine.length() <= messageSize){
             		messageSize -= nextLine.length();
-            		ChatUtils.sendMessageToUsers(mUser, targets, nextLine);
+            		ChatUtils.sendMessageToUsers(mServer, mUser, targets, nextLine);
             	} else {
             		mInOut.printOut("ERROR: message is larger than specified");
             		break;

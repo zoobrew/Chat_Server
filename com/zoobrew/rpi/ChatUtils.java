@@ -15,24 +15,24 @@ public class ChatUtils {
 		}
     }
 	
-	public static void sendMessageToUser(String sender, String target, String message){
-    	ChatConnection recp = Server.mConnections.get(target);
+	public static void sendMessageToUser(Server server, String sender, String target, String message){
+    	ChatConnection recp = server.mConnections.get(target);
     	recp.writeToClient("FROM " + sender + ": " + message);
     	if (!(sender.equalsIgnoreCase("SYSTEM"))){
-    		Server.addMessage(sender);
+    		server.addMessage(sender);
     	}
     }
 	
-	public static void sendMessageToUsers(String sender, String[] targets, String message){
+	public static void sendMessageToUsers(Server server, String sender, String[] targets, String message){
 		for (String target: targets){
-			sendMessageToUser(sender, target, message);
+			sendMessageToUser(server, sender, target, message);
 		}
 	}
 	
-	public static void sendMessageToAll(String sender, String message){
-		for (String user : Server.mConnections.keySet()) {
+	public static void sendMessageToAll(Server server, String sender, String message){
+		for (String user : server.mConnections.keySet()) {
     		if (!(user.equalsIgnoreCase(sender))){
-    			ChatUtils.sendMessageToUser(sender, user, message);
+    			sendMessageToUser(server, sender, user, message);
     		}
     	}
 	}

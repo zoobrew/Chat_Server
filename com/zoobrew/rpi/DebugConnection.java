@@ -8,8 +8,10 @@ public class DebugConnection {
     private PrintWriter mOut;
     private BufferedReader mIn;
     private String mIp;
+    private Server mServer;
     
-    public DebugConnection(BufferedReader in, PrintWriter out, String ip){
+    public DebugConnection(Server server, BufferedReader in, PrintWriter out, String ip){
+    	mServer = server;
     	mIn = in;
     	mOut = out;
     	mIp = ip;
@@ -32,7 +34,7 @@ public class DebugConnection {
     	mOut.println(message);
     }
 	public void verbosePrint(String message){
-		if (Server.DEBUGMODE){
+		if (mServer.DEBUGMODE){
 			System.out.println(message);
 		}
 	}
