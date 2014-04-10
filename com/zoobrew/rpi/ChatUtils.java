@@ -1,6 +1,5 @@
 package com.zoobrew.rpi;
 
-import java.util.LinkedList;
 
 public class ChatUtils {
 	

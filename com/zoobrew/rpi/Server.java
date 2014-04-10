@@ -11,6 +11,7 @@ public class Server {
 	private static RandomMessages mRandomMess;
 	private static int mMessageCount;
     public static int portNumber;
+    public static boolean DEBUGMODE = false;
     public static Hashtable<String, ChatConnection> mConnections =
             new Hashtable<String, ChatConnection>(32);
 
@@ -18,6 +19,13 @@ public class Server {
         if (args.length < 1) {
             System.err.println("Usage: ChatServer <port>");
             System.exit(1);
+        }
+        if (args.length > 1){
+        	for (String arg: args){
+        		if (arg.equals("-v")){
+        			DEBUGMODE = true;
+        		}
+        	}
         }
         System.out.println("Started server on port " + args[0]);
         String portNumber = args[0];

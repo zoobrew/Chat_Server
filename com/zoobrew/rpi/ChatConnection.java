@@ -22,9 +22,9 @@ public class ChatConnection implements Runnable{
     private String mUserName;
     private Boolean mLoggedIn;
     private Socket mClientSocket;
-    PrintWriter mPrinter;
-    private BufferedReader bufferIn;
+    private DebugConnection mInOut;
     private SendController mSendController;
+    
     
 
     ChatConnection(Socket socket){
@@ -35,13 +35,12 @@ public class ChatConnection implements Runnable{
     @Override
     public void run() {
         try {
-        mPrinter = new PrintWriter(mClientSocket.getOutputStream(), true);
-        bufferIn = new BufferedReader(new InputStreamReader(mClientSocket.getInputStream()));
-        System.out.println("Accepted client socket from " + mClientSocket.getRemoteSocketAddress());
+        mInOut = new DebugConnection(new BufferedReader(new InputStreamReader(mClientSocket.getInputStream())),
+        		new PrintWriter(mClientSocket.getOutputStream(), true), mClientSocket.getRemoteSocketAddress().toString());
 
         String inputLine;
         String input;
-            while ((inputLine = bufferIn.readLine()) != null) {
+            while ((inputLine = mInOut.readIn()) != null) {
             	input = inputLine.trim();
             	if (!parseMessage(input)){
             		mClientSocket.close();
@@ -56,7 +55,7 @@ public class ChatConnection implements Runnable{
     }
     
     public void writeToClient(String message){
-    	mPrinter.println(message);
+    	mInOut.printOut(message);
     }
     
     public String getUsername(){
@@ -69,12 +68,12 @@ public class ChatConnection implements Runnable{
     	} else if (!(mUserName == null)) {
 	    	if (input.startsWith(SEND_MESSAGE)){
 	    		if(mSendController == null){
-	    				mSendController = new SendController(this, mPrinter, bufferIn);
+	    				mSendController = new SendController(this, mInOut);
 	    		}
 	    		mSendController.sendStartMessage(input.substring(SEND_MESSAGE.length()));
 	    	} else if (input.startsWith(SEND_ALL)){
 	    		if(mSendController == null){
-    				mSendController = new SendController(this, mPrinter, bufferIn);
+    				mSendController = new SendController(this, mInOut);
 	    		}
 	    		mSendController.sendBroadcast();
 	    	} else if (input.startsWith(HERE)){
@@ -90,23 +89,23 @@ public class ChatConnection implements Runnable{
     
     private void userList(){
     	for (String user : Server.mConnections.keySet()) {
-    		mPrinter.println(user);
+    		mInOut.printOut(user);
     	}
     }
     
     private void login(String message){
     	if( mLoggedIn){
-    		mPrinter.println("Already logged in, log out to log in as another user");
+    		mInOut.printOut("Already logged in, log out to log in as another user");
     	}
     	else {
     		String username = ChatUtils.getFirstWord(message).toLowerCase();
 			if (Server.mConnections.containsKey(username)){
-				mPrinter.println("Username is already in use");
+				mInOut.printOut("Username is already in use");
 			} else {
 				mUserName = username;
 				Server.mConnections.put(mUserName, this);
 				mLoggedIn = true;
-				mPrinter.println("Username is: " + mUserName);
+				mInOut.printOut("USERNAME IS: " + mUserName);
 			}
     	}
     }
@@ -114,11 +113,11 @@ public class ChatConnection implements Runnable{
     private void logout(){
     	if (mLoggedIn){
     		Server.mConnections.remove(mUserName);
-    		mPrinter.println("User " + mUserName + " has logged out");
+    		mInOut.printOut("User " + mUserName + " has logged out");
     		mUserName = null;
     		mLoggedIn = false;
     	} else{
-    		mPrinter.println("ERROR: Not logged is as any user");
+    		mInOut.printOut("ERROR: Not logged is as any user");
     	}
     }
 }
