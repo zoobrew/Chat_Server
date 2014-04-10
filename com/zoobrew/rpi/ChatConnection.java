@@ -24,14 +24,12 @@ public class ChatConnection implements Runnable{
     private Socket mClientSocket;
     PrintWriter mPrinter;
     private BufferedReader bufferIn;
-    private ChatMode mMode;
     private SendController mSendController;
     
 
     ChatConnection(Socket socket){
         mClientSocket = socket;
         mLoggedIn = false;
-        mMode = new NormalMode();
     }
 
     @Override
@@ -64,9 +62,6 @@ public class ChatConnection implements Runnable{
     public String getUsername(){
     	return mUserName;
     }
-    public ChatMode getMode(){
-    	return mMode;
-    }
     
     private boolean parseMessage(String input){
     	if(input.startsWith(LOGIN)){
@@ -91,10 +86,6 @@ public class ChatConnection implements Runnable{
     		return false;
     	}
     	return true;
-    }
-    
-    public void setMode(ChatMode mode){
-    	mMode = mode;
     }
     
     private void userList(){

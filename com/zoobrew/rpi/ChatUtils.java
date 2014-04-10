@@ -1,5 +1,7 @@
 package com.zoobrew.rpi;
 
+import java.util.LinkedList;
+
 public class ChatUtils {
 	
 	public static String getFirstWord(String sentance){
@@ -21,6 +23,12 @@ public class ChatUtils {
     		Server.addMessage(sender);
     	}
     }
+	
+	public void sendMessageToUsers(String sender, LinkedList<String> targets, String message){
+		for (String target: targets){
+			sendMessageToUser(sender, target, message);
+		}
+	}
 	
 	public static void sendMessageToAll(String sender, String message){
 		for (String user : Server.mConnections.keySet()) {

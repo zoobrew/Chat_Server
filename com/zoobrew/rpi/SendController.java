@@ -54,6 +54,10 @@ public class SendController {
 		String input;
 		String nextLine;
 		try {
+			line = line.trim();
+			if(line.startsWith("c")){
+				line = line.substring(1);
+			}
 			messageSize = Integer.parseInt(line);
 			while (((input = mInput.readLine()) != null) && (messageSize > 0)) {
             	nextLine = input.trim();
@@ -61,6 +65,7 @@ public class SendController {
             		messageSize -= nextLine.length();
             		ChatUtils.sendMessageToAll(mUser, nextLine);
             	} else {
+            		ChatUtils.sendMessageToAll(mUser, nextLine.substring(0, messageSize));
             		mPrinter.println("ERROR: message is larger than specified");
             		break;
             	}
@@ -105,9 +110,10 @@ public class SendController {
 			if (input != null){
 				nextLine = input.trim();
 				if(nextLine.startsWith("c")){
-					//handle chunked message
-				} else
+					sendMessage(toUser, nextLine.substring(1));
+				} else {
 				sendMessage(toUser, nextLine);
+				}
 			}
 		} catch (IOException e) {
 			System.out.println("IOException caught while writing to client");
