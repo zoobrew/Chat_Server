@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class DebugConnection {
+public class DebugConnection implements VerboseIO{
     private PrintWriter mOut;
     private BufferedReader mIn;
     private String mIp;

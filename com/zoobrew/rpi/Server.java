@@ -1,8 +1,5 @@
 package com.zoobrew.rpi;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.Hashtable;
 
 /* Main Class of the Chat Server */
@@ -11,8 +8,10 @@ public class Server implements Runnable{
 	private RandomMessages mRandomMess;
 	private int mMessageCount;
     public int mPortNumber;
-    public boolean DEBUGMODE = false;
+    public boolean DEBUGMODE = true;
     public Hashtable<String, ChatConnection> mConnections;
+    public TCPServer mTCPServer;
+    public UDPServer mUDPServer;
 
     public Server(boolean DebugMode, int port){
     	mConnections = new Hashtable<String, ChatConnection>(32);
@@ -22,24 +21,11 @@ public class Server implements Runnable{
     	mMessageCount = 0;
     }
     public void run(){
-    	
+    	mTCPServer = new TCPServer(this);
+    	mUDPServer = new UDPServer(this);
         System.out.println("Started server on port " + mPortNumber);
-        Socket clientSocket;
-        ChatConnection clientConnection;
-        try (
-                ServerSocket chatServerSocket = new ServerSocket(mPortNumber);
-            ){
-                /* block until a client is connnected */
-                while (true) {
-                    clientSocket = chatServerSocket.accept();
-                    clientConnection = new ChatConnection(this, clientSocket);
-                    new Thread(clientConnection).start();
-                }
-
-        } catch (IOException exception) {
-            System.out.println("IOException caught while listening on port " + mPortNumber);
-            System.out.println(exception.getMessage());
-        }
+        new Thread(mTCPServer).start();
+        new Thread(mUDPServer).start();
     }
     
     public void addMessage(String sender){

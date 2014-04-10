@@ -5,10 +5,10 @@ public class SendController {
 
 	private String mUser;
 	private ChatConnection mConnection;
-    private DebugConnection mInOut;
+    private VerboseIO mInOut;
     private Server mServer;
 	
-	public SendController(Server server, ChatConnection connection, DebugConnection inOut){
+	public SendController(Server server, ChatConnection connection, VerboseIO inOut){
 		mServer = server;
 		mConnection = connection;
 		mUser = mConnection.getUsername();
