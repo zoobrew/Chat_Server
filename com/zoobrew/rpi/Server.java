@@ -9,11 +9,8 @@ import java.util.Hashtable;
 public class Server {
 
     public static int portNumber;
-    static Hashtable<String, ChatConnection> connections =
+    public static Hashtable<String, ChatConnection> mConnections =
             new Hashtable<String, ChatConnection>(32);
-
-    //up to 32 concurrent clients
-    //hashmap with usernames?
 
     public static void main(String[] args) {
         if (args.length < 1) {
@@ -31,7 +28,7 @@ public class Server {
                 /* block until a client is connnected */
                 while (true) {
                     clientSocket = chatServerSocket.accept();
-                    clientConnection = new ChatConnection(clientSocket, connections);
+                    clientConnection = new ChatConnection(clientSocket);
                     new Thread(clientConnection).start();
                 }
 

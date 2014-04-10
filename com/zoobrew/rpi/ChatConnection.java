@@ -24,13 +24,12 @@ public class ChatConnection implements Runnable{
     private Boolean mLoggedIn;
     private Socket mClientSocket;
     PrintWriter mPrinter;
-    private Hashtable<String, ChatConnection> mConnectionTable;
     private ChatMode mMode;
+    private SendController mSendController;
     
 
-    ChatConnection(Socket socket, Hashtable<String, ChatConnection> connections){
+    ChatConnection(Socket socket){
         mClientSocket = socket;
-        mConnectionTable = connections;
         mLoggedIn = false;
         mMode = new NormalMode();
     }
@@ -62,12 +61,18 @@ public class ChatConnection implements Runnable{
     	mPrinter.println(message);
     }
     
+    public String getUsername(){
+    	return mUserName;
+    }
+    
     private boolean parseMessage(String input){
     	if(input.startsWith(LOGIN)){
     		login(input.substring(LOGIN.length()));
     	} else if (!(mUserName == null)) {
-    	
 	    	if (input.startsWith(SEND_MESSAGE)){
+	    		if(mSendController == null){
+	    				mSendController = new SendController(this, mPrinter);
+	    		}
 	    		sendMessage(input.substring(SEND_MESSAGE.length()));
 	    	} else if (input.startsWith(SEND_ALL)){
 	    		sendAll(input);
@@ -76,7 +81,7 @@ public class ChatConnection implements Runnable{
 	    	} else if (input.startsWith(EXIT)){
 	    		logout();
 	    	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND)){
-	    		sendMessageToUser(((SendingMode) mMode).getRecipent(), input);
+	    		mSendController.sendMessageToUser(((SendingMode) mMode).getRecipent(), input);
 	    	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND_ALL)){
 	    		sendAll(input);
 	    	}
@@ -86,39 +91,38 @@ public class ChatConnection implements Runnable{
     	return true;
     }
     
+    public void setMode(ChatMode mode){
+    	mMode = mode;
+    }
+    
     private void sendAll(String input){
     	mMode = new SendAllMode(mUserName);
     	String message = input.substring(SEND_ALL.length());
-    	for (String user : mConnectionTable.keySet()) {
+    	for (String user : Server.mConnections.keySet()) {
     		if (!(user.equalsIgnoreCase(mUserName))){
-    			sendMessageToUser(user, message);
+    			mSendController.sendMessageToUser(user, message);
     		}
     	}
     	
     }
     
     private void sendMessage(String input){
-    	String sender = getFirstWord(input).toLowerCase();
+    	String sender = ChatUtils.getFirstWord(input).toLowerCase();
     	mPrinter.println("sender is: " + sender + "!");
     	String remaining = input.substring(sender.length()+1);
 		if (sender.equalsIgnoreCase(mUserName)){
-			String target = getFirstWord(remaining).toLowerCase();
+			String target = ChatUtils.getFirstWord(remaining).toLowerCase();
 			mPrinter.println("Receipiant is: " + target + "!");
 			remaining = remaining.substring(target.length()+1);
 			mMode = new SendingMode(mUserName, target);
-			sendMessageToUser(target, remaining);
+			mSendController.sendMessageToUser(target, remaining);
 		} else {
 			mPrinter.println("ERROR: cannot send message as another user");
 		}
     }
     
-    private void sendMessageToUser(String target, String message){
-    	ChatConnection recp = mConnectionTable.get(target);
-    	recp.writeToClient(mUserName + ": " + message);
-    }
-    
     private void userList(){
-    	for (String user : mConnectionTable.keySet()) {
+    	for (String user : Server.mConnections.keySet()) {
     		mPrinter.println(user);
     	}
     }
@@ -128,17 +132,12 @@ public class ChatConnection implements Runnable{
     		mPrinter.println("Already logged in, log out to log in as another user");
     	}
     	else {
-	    	if (message.indexOf('\n') > -1){
-				mUserName = message.substring(0, message.indexOf(' ')).toLowerCase();
-			}else if (!(message.indexOf(' ') < 0)){
-				mUserName = message.substring(0, message.indexOf(' ')).toLowerCase();
-			} else {
-				mUserName = message.toLowerCase();
-			}
-			if (mConnectionTable.containsKey(mUserName)){
+    		String username = ChatUtils.getFirstWord(message).toLowerCase();
+			if (Server.mConnections.containsKey(username)){
 				mPrinter.println("Username is already in use");
 			} else {
-				mConnectionTable.put(mUserName, this);
+				mUserName = username;
+				Server.mConnections.put(mUserName, this);
 				mLoggedIn = true;
 				mPrinter.println("Username is: " + mUserName);
 			}
@@ -147,23 +146,12 @@ public class ChatConnection implements Runnable{
     
     private void logout(){
     	if (mLoggedIn){
-    		mConnectionTable.remove(mUserName);
-    		mLoggedIn = false;
+    		Server.mConnections.remove(mUserName);
     		mPrinter.println("User " + mUserName + " has logged out");
+    		mUserName = null;
+    		mLoggedIn = false;
     	} else{
     		mPrinter.println("ERROR: Not logged is as any user");
     	}
-    }
-    
-    private String getFirstWord(String sentance){
-    	if (!(sentance.indexOf("\r\n") < 0)){
-			return sentance.substring(0, sentance.indexOf("\r\n"));
-		} else if  (!(sentance.indexOf('\n') <0 )){
-			return sentance.substring(0, sentance.indexOf('\n'));
-		} else if (!(sentance.indexOf(' ') < 0)){
-			return sentance.substring(0, sentance.indexOf(' '));
-		} else {
-			return sentance;
-		}
     }
 }
