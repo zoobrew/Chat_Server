@@ -31,6 +31,47 @@ public class SendController {
 		}
 	}
 	
+	public void sendBroadcast(){
+		String input;
+		String numberLine;
+		try {
+			input = mInput.readLine();
+			if (input != null){
+				numberLine = input.trim();
+				if(numberLine.startsWith("c")){
+					//handle chunked message
+				} else
+				sendAll(numberLine);
+			}
+		} catch (IOException e) {
+			System.out.println("IOException caught while writing to client");
+            System.out.println(e.getMessage());
+		}
+	}
+			
+	public void sendAll(String line){
+		int messageSize;
+		String input;
+		String nextLine;
+		try {
+			messageSize = Integer.parseInt(line);
+			while (((input = mInput.readLine()) != null) && (messageSize > 0)) {
+            	nextLine = input.trim();
+            	if (nextLine.length() <= messageSize){
+            		messageSize -= nextLine.length();
+            		ChatUtils.sendMessageToAll(mUser, nextLine);
+            	} else {
+            		mPrinter.println("ERROR: message is larger than specified");
+            		break;
+            	}
+            }
+		} catch (NumberFormatException numForEx){
+			mPrinter.println("ERROR: SEND must specify size of message on second line");
+		} catch (IOException e) {
+			System.out.println("IOException caught while writing to client");
+            System.out.println(e.getMessage());
+		}
+    }
 	
 	public void sendMessage(String target, String line){
 		int messageSize;

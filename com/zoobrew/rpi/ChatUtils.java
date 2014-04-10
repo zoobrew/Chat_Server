@@ -21,5 +21,13 @@ public class ChatUtils {
     		Server.addMessage(sender);
     	}
     }
+	
+	public static void sendMessageToAll(String sender, String message){
+		for (String user : Server.mConnections.keySet()) {
+    		if (!(user.equalsIgnoreCase(sender))){
+    			ChatUtils.sendMessageToUser(sender, user, message);
+    		}
+    	}
+	}
 
 }

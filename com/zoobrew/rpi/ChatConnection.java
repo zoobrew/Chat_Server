@@ -11,7 +11,7 @@ public class ChatConnection implements Runnable{
 
     private String LOGIN = "ME IS ";
     private String SEND_MESSAGE = "SEND ";
-    private String SEND_ALL = "BROADCAST ";
+    private String SEND_ALL = "BROADCAST";
     private String HERE = "WHO HERE";
     private String EXIT = "LOGOUT";
 
@@ -77,17 +77,15 @@ public class ChatConnection implements Runnable{
 	    				mSendController = new SendController(this, mPrinter, bufferIn);
 	    		}
 	    		mSendController.sendStartMessage(input.substring(SEND_MESSAGE.length()));
-	    		//sendMessage(input.substring(SEND_MESSAGE.length()));
 	    	} else if (input.startsWith(SEND_ALL)){
-	    		sendAll(input);
+	    		if(mSendController == null){
+    				mSendController = new SendController(this, mPrinter, bufferIn);
+	    		}
+	    		mSendController.sendBroadcast();
 	    	} else if (input.startsWith(HERE)){
 	    		userList();
 	    	} else if (input.startsWith(EXIT)){
 	    		logout();
-	    	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND)){
-	    		ChatUtils.sendMessageToUser(mUserName, ((SendingMode) mMode).getRecipent(), input);
-	    	} else if (mMode.getMode().equals(ChatMode.ConnectionMode.SEND_ALL)){
-	    		sendAll(input);
 	    	}
     	} else {
     		return false;
@@ -97,17 +95,6 @@ public class ChatConnection implements Runnable{
     
     public void setMode(ChatMode mode){
     	mMode = mode;
-    }
-    
-    private void sendAll(String input){
-    	mMode = new SendAllMode(mUserName);
-    	String message = input.substring(SEND_ALL.length());
-    	for (String user : Server.mConnections.keySet()) {
-    		if (!(user.equalsIgnoreCase(mUserName))){
-    			ChatUtils.sendMessageToUser(mUserName, user, message);
-    		}
-    	}
-    	
     }
     
     private void userList(){
