@@ -16,7 +16,7 @@ public class ChatUtils {
 	
 	public static void sendMessageToUser(String sender, String target, String message){
     	ChatConnection recp = Server.mConnections.get(target);
-    	recp.writeToClient("FROM " + sender + '\n' + message);
+    	recp.writeToClient("FROM " + sender + ": " + message);
     	if (!(sender.equalsIgnoreCase("SYSTEM"))){
     		Server.addMessage(sender);
     	}

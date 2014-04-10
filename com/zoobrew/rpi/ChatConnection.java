@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Hashtable;
 
 /* A single connection by a user to the server */
 public class ChatConnection implements Runnable{
@@ -24,6 +23,7 @@ public class ChatConnection implements Runnable{
     private Boolean mLoggedIn;
     private Socket mClientSocket;
     PrintWriter mPrinter;
+    private BufferedReader bufferIn;
     private ChatMode mMode;
     private SendController mSendController;
     
@@ -38,12 +38,12 @@ public class ChatConnection implements Runnable{
     public void run() {
         try {
         mPrinter = new PrintWriter(mClientSocket.getOutputStream(), true);
-        BufferedReader in = new BufferedReader(new InputStreamReader(mClientSocket.getInputStream()));
+        bufferIn = new BufferedReader(new InputStreamReader(mClientSocket.getInputStream()));
         System.out.println("Accepted client socket from " + mClientSocket.getRemoteSocketAddress());
 
         String inputLine;
         String input;
-            while ((inputLine = in.readLine()) != null) {
+            while ((inputLine = bufferIn.readLine()) != null) {
             	input = inputLine.trim();
             	if (!parseMessage(input)){
             		mClientSocket.close();
@@ -64,6 +64,9 @@ public class ChatConnection implements Runnable{
     public String getUsername(){
     	return mUserName;
     }
+    public ChatMode getMode(){
+    	return mMode;
+    }
     
     private boolean parseMessage(String input){
     	if(input.startsWith(LOGIN)){
@@ -71,9 +74,10 @@ public class ChatConnection implements Runnable{
     	} else if (!(mUserName == null)) {
 	    	if (input.startsWith(SEND_MESSAGE)){
 	    		if(mSendController == null){
-	    				mSendController = new SendController(this, mPrinter);
+	    				mSendController = new SendController(this, mPrinter, bufferIn);
 	    		}
-	    		sendMessage(input.substring(SEND_MESSAGE.length()));
+	    		mSendController.sendStartMessage(input.substring(SEND_MESSAGE.length()));
+	    		//sendMessage(input.substring(SEND_MESSAGE.length()));
 	    	} else if (input.startsWith(SEND_ALL)){
 	    		sendAll(input);
 	    	} else if (input.startsWith(HERE)){
@@ -104,21 +108,6 @@ public class ChatConnection implements Runnable{
     		}
     	}
     	
-    }
-    
-    private void sendMessage(String input){
-    	String sender = ChatUtils.getFirstWord(input).toLowerCase();
-    	mPrinter.println("sender is: " + sender + "!");
-    	String remaining = input.substring(sender.length()+1);
-		if (sender.equalsIgnoreCase(mUserName)){
-			String target = ChatUtils.getFirstWord(remaining).toLowerCase();
-			mPrinter.println("Receipiant is: " + target + "!");
-			remaining = remaining.substring(target.length()+1);
-			mMode = new SendingMode(mUserName, target);
-			ChatUtils.sendMessageToUser(mUserName, target, remaining);
-		} else {
-			mPrinter.println("ERROR: cannot send message as another user");
-		}
     }
     
     private void userList(){
